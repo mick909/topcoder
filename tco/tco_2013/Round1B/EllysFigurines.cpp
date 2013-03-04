@@ -1,45 +1,50 @@
+/*
+  方針：
+    片方の消し方を全探索する -> 最大 2^15
+    各消し方について、もう一方の消し方はXが残っている部分を
+    順に消していく
+
+    行の情報を2値化することでbitmaskで片方の消し方を演算する
+    残りの行は行の値が0かで判定できる
+ */
+#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <climits>
-#include <cfloat>
-#include <map>
-#include <utility>
-#include <set>
-#include <memory>
-#include <ctime>
-#include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <functional>
-#include <sstream>
-#include <complex>
-#include <deque>
-#include <stack>
-#include <queue>
 
 using namespace std;
-
-static const double EPS = 1e-5;
-typedef long long ll;
 
 class EllysFigurines {
 public:
   int H,W;
-  int check(vector<int>& bi, int mask, int rn) {
+  int R;
+
+  // 行で消す回数を数える
+  int check(vector<int>& bi, int mask) {
     int cnt = 0;
+
     for (int h=0; h<H; ++h) {
+      // 既に消えている行はスキップ
       if ((bi[h] & mask) == 0) continue;
+
       ++cnt;
-      h += rn-1;
+
+      // Rの分が一度で消えるので、その次の行に移動
+      // for文で+1されるので-1が要る
+      h += R-1;
     }
     return cnt;
   }
 
-   int getMoves( vector <string> board, int R, int C ) {
+   int getMoves( vector <string> board, int r, int C ) {
      H=board.size();
      W=board[0].size();
+     R=r;
+
+     // 最初にboardの内容を2値化してint配列にする
+     // 15列までなのでintでok
      vector<int> bi;
      for (int h=0; h<H; ++h) {
        int rb=0;
@@ -50,17 +55,30 @@ public:
        bi.push_back(rb);
      }
 
-     int ans = max(H,W);
+     // どんなに大きくてもHかWの小さい方で消せるので
+     int ans = min(H,W);
+
+     // 列側の選択を全探索する
+     // C>1の場合は重なりを考えると無駄なパターンもあるけれど
+     // 判定が面倒だし所詮2^15なのでキニシナイ
      for (int cm=0; cm<(1<<W); ++cm) {
+
+       // cm => 1の桁の列をremoveする
+       // C>1の場合は連続する列が消えるのでorでマスクを重ねる
        int mask=0;
        for (int c=0; c<C; ++c) {
 	 mask |= (cm >> c);
        }
+
+       // 選択した列の数をまず数える
        int sub = 0;
        for (int i=0; i<W; ++i) {
 	 if ((cm & (1<<i))) ++sub;
        }
-       sub += check(bi, ~mask, R);
+
+       // 残るビットを行で消すときの回数を加える
+       sub += check(bi, ~mask);
+
        ans = min(ans,sub);
      }
      return ans;
