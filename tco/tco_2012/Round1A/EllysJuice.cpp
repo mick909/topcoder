@@ -1,62 +1,42 @@
 /*
-  あまりアタマの良くない解法
-  playersの要素数は最大8なので、順番の総数は8!=40,320通り
-  なので全探索すると、40,320*8 = 322,560回ループ
-  大した回数ではないけれど、mapをいじったりしているので結構重い
-  => players.size()==8のときArenaで600msくらい
-     ==9だとたぶんTLE
+  勝利条件は、
+   playersが一人だけ
+  or
+   2回以上飲める
+  だけ。
+  最初に2回飲む=0.5+0.5=1を得ると、
+  以後は他の人が有限回どれだけ飲んでも決して1.0に達しない
+
+  最初にplayers.size()==1の場合を場合分けして、
+  あとは2回以上出てくる名前を集めてsortして返せばよい
  */
 #include <cstdio>
 #include <cstdlib>
-#include <cfloat>
 #include <map>
-#include <utility>
-#include <set>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
+
 using namespace std;
-
-#define rep(i,b,e) for(int i=b;i<e;++i)
-#define mp make_pair
-#define pb push_back
-#define all(c) (c).begin(),(c).end()
-
-typedef vector<int> vi;
 
 class EllysJuice {
 public:
    vector <string> getWinners( vector <string> players ) {
-   	int N=players.size();
-   	vi ps;
-   	rep(i,0,N) ps.pb(i);
-
-	set<string> ans;
-	do {
-   		map<string, double> gm;
-   		rep(j,0,N) gm[players[j]]=0;
-   		
-   		double bt[2] = {1.0L, 1.0L};
-   		for (int j=0; j<N; ++j) {
-   			bt[j%2] /= 2;
-   			gm[players[ps[j]]] += bt[j%2];
-   		}
-   		
-   		vector< pair<double, string> > rs;
-   		for (map<string,double>::iterator it=gm.begin(); it!=gm.end(); ++it) {
-   			rs.pb(mp((*it).second, (*it).first));
-   		}
-   		sort(all(rs));
-   		reverse(all(rs));
-   		if (rs.size() > 1 && rs[0].first == rs[1].first) continue;
-   		ans.insert(rs[0].second);
-   	} while (next_permutation(all(ps)));
-   	
-   	vector<string> r;
-   	for (set<string>::iterator it=ans.begin(); it!=ans.end(); ++it) r.pb(*it);
-   	
-   	return r;
+    int N=players.size();
+    if (N == 1) return players;
+    
+    map<string, int> msi;
+    vector<string> ans;
+    for (int i=0; i<N; ++i) {
+      string& nm = players[i];
+      if (msi.find(nm) == msi.end()) msi[nm] = 0;
+      else if (msi[nm] == 1) ans.push_back(nm);
+      ++msi[nm];
+     }
+     
+     sort(ans.begin(), ans.end());
+     return ans;
    }
 };
 
