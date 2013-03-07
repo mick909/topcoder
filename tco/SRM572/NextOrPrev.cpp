@@ -1,124 +1,31 @@
 /*
-  上昇するグループと下降するグループにわける
-  NG条件を判定する
-    NG条件 = ある文字の移動範囲が、他の文字の移動範囲に完全に含まれる --(1)
-          | ある文字の移動範囲が、移動しない文字を含んでいる    --(2)
-              -> 含む側の移動中に必ず他の文字と同じ文字になってしまう
-                 startとgoalに同じ文字は含まれないので、
-                 同じ文字が出てきてしまったらgoalにたどり着けない
-          | 上昇するグループと下降するグループの移動範囲が重なる --(3)
-
-    上昇するグループ、下降するグループのグループ内では、
-    移動範囲が重なっても良い
-
-    ・それぞれのグループにおいて以下のような移動があったら ret(-1)
-       g1     　g1      s1      s1
-       | g2     |       | s2    |
-       | |      | s=g   | |     | s=g
-       | s2     |       | g2    |
-       s1       s1      g1      g1
-
-    ・上昇するグループと下降するグループとで重なるものがあったら ret(-1)
-       g1
-       |  s2
-       |  |
-       s1 |
-          g2
-
-    ・このパターンは移動可能(どちらもs2から先に移動すればぶつからない)
-          g2         s1
-       g1 |      s2  |
-       |  s2     |   |
-       |         |   g1
-       s1        g2
- */
+ これだけで良い・・・
+*/
 #include <cstdio>
 #include <cstdlib>
-#include <utility>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
-#define pb push_back
-#define mp make_pair
-#define all(c) (c).begin(),(c).end()
-
-typedef pair<int,int> pii;
-typedef vector<pii> vpii;
-typedef vector<int> vi;
+static const double EPS = 1e-5;
+typedef long long ll;
 
 class NextOrPrev {
 public:
-  int N;
    int getMinimum( int nextCost, int prevCost, string start, string goal ) {
-     N=start.size();
-
-     // uds[0]:下降するグループ, uds[1]:上昇するグループ
-     vpii uds[2];
-     // ss:移動しない文字セット
-     vi   ss;
-
-     for (int i=0; i<N; ++i) {
-       if (start[i] > goal[i]) uds[0].pb(mp(goal[i],start[i]));
-       if (start[i] < goal[i]) uds[1].pb(mp(start[i],goal[i]));
-       if (start[i]==goal[i]) ss.pb(start[i]);
-     }
-     sort(all(uds[0]));
-     sort(all(uds[1]));
-
-     // それぞれのグループで、(1)条件を判定
-     for (int k=0; k<2; ++k) {
-       // iの範囲を[1,size())とするのがポイント
-       // [0,size()-1)はNG => size()がunsignedなので、-1しても0より小にならない
-       // [1,size())にしておくと、vectorのサイズが0,1の場合でもループにはいらずに
-       // 正しく動作する
-       for (int i=1; i<uds[k].size(); ++i) {
-         if (uds[k][i-1].second > uds[k][i].second) return -1;
-       }
-     }
-
-     int c[2];
-     c[0] = prevCost; c[1] = nextCost;
+     int N=start.size();
      int ans = 0;
-     // それぞれのグループで(2)条件を判定
-     // ついでに移動コストの合計を計算
-     // 範囲は[0,size())で、vectorが空でも大丈夫
-     for (int k=0; k<2; ++k) {
-       for (int i=0; i<uds[k].size(); ++i) {
-	 ans += (uds[k][i].second-uds[k][i].first)*c[k];
-	 for (int j=0; j<ss.size(); ++j) {
-	   if (uds[k][i].first < ss[j] && ss[j] < uds[k][i].second) return -1;
-	 }
+     for (int i=0; i<N; ++i) {
+       for (int j=i+1; j<N; ++j) {
+	 // 二つの移動が衝突しないことは、この条件だけで良い
+         if (start[i]<start[j] && goal[i]>goal[j]) return -1;
+         if (start[i]>start[j] && goal[i]<goal[j]) return -1;
        }
+       if (start[i]<goal[i]) ans += (goal[i]-start[i])*nextCost;
+       if (start[i]>goal[i]) ans += (start[i]-goal[i])*prevCost;
      }
-     /*
-     // どちらかのグループが空なら、この時点でOK
-     // 実は要らない
-     if (uds[0].size() == 0 || uds[1].size() == 0) {
-       return ans;
-     }
-     */
-
-     // cp: 上昇グループと下降グループを走査するイテレータ
-     int cp[2] = {0,0};
-     // dx: どちらのグループの下端が下側か（最初は上昇グループが下と仮定）
-     int dx=1;
-
-     // どちらかのグループを走査し終わったら完了
-     while (cp[0]<uds[0].size() && cp[1]<uds[1].size()) {
-       // 下端が下側になるグループをチェック
-       if (uds[dx^1][cp[dx^1]].first < uds[dx][cp[dx]].first) {dx^=1;}
-
-       // 下側の上端が、上側の下端より上だったら、重なってしまっている
-       if (uds[dx][cp[dx]].second > uds[dx^1][cp[dx^1]].first) return -1;
-
-       // 下端の側を一つ進める
-       ++cp[dx];
-     }
-
      return ans;
    }
 };
