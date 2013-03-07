@@ -1,7 +1,9 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <cstdlib>
 #include <bitset>
+#include <vector>
 
 using namespace std;
 
@@ -56,6 +58,21 @@ int prime_factorize(int n, const int *p, int pcnt, int *f) {
   return idx;
 }
 
+/**
+ * 素因数分解
+ * nを素因数分解する
+ * param p   : 素数のリスト
+ * param pcnt: pの数
+ * retval f  : 素因数分解したときの、素因数と係数のペア
+ * retval : 素因数の数
+ */
+int prime_factorize2(int n, const int *p, int pcnt, vector<pair<int,int> >& f) {
+  int idx=0;
+  f.clear();
+  for(int i=0;n>=2&&i<pcnt;++i){if((n%p[i])==0){f.push_back(make_pair(p[i],0));do{++(f[idx].second);n/=p[i];}while((n%p[i])==0);++idx;}}
+  return idx;
+}
+
 int main(int argc, char *argv[]) {
   int ps[MAX];
   int f[MAX];
@@ -95,6 +112,15 @@ int main(int argc, char *argv[]) {
     if (f[i]) {
       cout << ps[i] << "^" << f[i] << " ";
     }
+  }
+  cout << endl;
+#endif
+
+#if 1
+  vector<pair<int,int> > r;
+  int c2 = prime_factorize2(a, ps, cnt, r);
+  for (int i=0; i<c2; ++i) {
+    cout << r[i].first << "^" << r[i].second << " ";
   }
   cout << endl;
 #endif
