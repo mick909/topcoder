@@ -1,53 +1,43 @@
-// Paste me into the FileEdit configuration dialog
+/*
+ 解その２
+
+ 最高到達位置は、firstからp回+d分upしてから、(n-2-p)回-d分downした
+ last直前の位置lが、|last-l|<=d となった地点 -(1)
+ ただし、last>lの場合は、(last-l)のupを一回増やせる -(2)
+   0 <= p <n-1, n=2かつfirst>lastの時は(2)の補正ができない
+
+ pは0から数えてもn-2から数えても結果は同じ
+   lastの直前の位置lは2d単位で移動するから
+
+ 最後の条件(n=2かつ first>lastは補正できない)が面倒
+ (見落とすとWA)
+*/
 
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <climits>
-#include <cfloat>
-#include <ctime>
-#include <map>
-#include <utility>
-#include <set>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <functional>
-#include <sstream>
-#include <complex>
-#include <stack>
-#include <queue>
+
 using namespace std;
-#define rep(i,b,e) for(int i=b;i<e;++i)
-#define mp make_pair
-#define pb push_back
-#define all(c) (c).begin(),(c).end()
-static const double EPS = 1e-9;
-typedef long long ll;
-typedef vector<int> vi;
-typedef vector<vi> vvi;
-typedef pair<int,int> pii;
-static const ll Zp = 1000000009;
 
 class TheArray {
 public:
    int find( int n, int d, int first, int last ) {
-     int ans1 = (n-2) * d + first;
-     int dn = 1;
-	while (abs(last-ans1) > d*dn && ans1 > first) {
-	     	ans1 -= d;
-	     	++dn;
-	}
-     int ans2 = (n-2) * d + last;
-     dn = 1;
-	while (abs(first-ans2) > d*dn && ans2 > last) {
-	     	ans2 -= d;
-	     	++dn;
-	}
-     
-     return max(ans1,ans2);
+     int p = 0;
+     int m = first + p * d;
+     int l = m - (n-2-p) * d;
+
+     while (abs(l-last) > d) {
+       ++p;
+       m += d;
+       l += d*2;
+     }
+
+     if (n > 2 || first<last) m += max(0, last-l);
+     return m;
    }
 };
 
@@ -124,8 +114,8 @@ namespace moj_harness {
 		case 0: {
 			int n                     = 3;
 			int d                     = 5;
-			int first                 = 4; //2;
-			int last                  = 2; //4;
+			int first                 = 2;
+			int last                  = 4;
 			int expected__            = 7;
 
 			clock_t start__           = clock();
@@ -135,8 +125,8 @@ namespace moj_harness {
 		case 1: {
 			int n                     = 10;
 			int d                     = 100;
-			int first                 = 100; //999;
-			int last                  = 999; //100;
+			int first                 = 999;
+			int last                  = 100;
 			int expected__            = 999;
 
 			clock_t start__           = clock();
@@ -157,8 +147,8 @@ namespace moj_harness {
 		case 3: {
 			int n                     = 97;
 			int d                     = 53;
-			int first                 = 441; //-92;
-			int last                  = -92; //441;
+			int first                 = -92;
+			int last                  = 441;
 			int expected__            = 2717;
 
 			clock_t start__           = clock();
@@ -168,8 +158,8 @@ namespace moj_harness {
 		case 4: {
 			int n                     = 99;
 			int d                     = 3;
-			int first                 = -619;
-			int last                  = -743;
+			int first                 = -743;
+			int last                  = -619;
 			int expected__            = -535;
 
 			clock_t start__           = clock();
@@ -179,17 +169,17 @@ namespace moj_harness {
 
 		// custom cases
 
-      case 5: {
-			int n                     = 10;
-			int d                     = 120;
-			int first                 = -10;
-			int last                  = -1000;
-			int expected__            = -10;
+/*      case 5: {
+			int n                     = ;
+			int d                     = ;
+			int first                 = ;
+			int last                  = ;
+			int expected__            = ;
 
 			clock_t start__           = clock();
 			int received__            = TheArray().find(n, d, first, last);
 			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
+		}*/
 /*      case 6: {
 			int n                     = ;
 			int d                     = ;
