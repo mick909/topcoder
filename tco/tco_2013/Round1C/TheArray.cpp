@@ -1,24 +1,15 @@
 /*
- 解その２
+ 解その3
 
- 最高到達位置は、firstからp回+d分upしてから、(n-2-p)回-d分downした
- last直前の位置lが、|last-l|<=d となった地点 -(1)
- ただし、last>lの場合は、(last-l)のupを一回増やせる -(2)
-   0 <= p <n-1, n=2かつfirst>lastの時は(2)の補正ができない
+ firstからp回分up上がり、lastからもp位置まで(n-1-p)回分上がると考える
+ firstからのラインとlastからのラインが合流するためには、
+ より上まで上がってしまう方は低い方に合わるしかない
 
- pは0から数えてもn-2から数えても結果は同じ
-   lastの直前の位置lは2d単位で移動するから
+ つまりp<=[0,n-1]において、min(first+p*d, last+(n-1-p)*d)の
+ 最大値を探すだけで良い
 
- 最後の条件(n=2かつ first>lastは補正できない)が面倒
- (見落とすとWA)
-
- n==2の場合はmax(first,last)なので先に弾いた方が楽
- すると、かならず補正( max(0, last-l)の加算 )ができる
-
- 探索範囲を[a=0, b=n-1)として二分探索
- b=n-1はpの条件外だけれど、計算上必ず範囲外になるので
- 開区間の開始位置として利用できる
- 二分探索では条件外の値でも判定さえできれば利用してよい
+ n<=[2,1000000]なのでナイーブに全探索してよい
+ もうちょっと桁が増えたら、解その2の二分探索が必要になる
 */
 
 #include <cstdio>
@@ -34,21 +25,8 @@ using namespace std;
 class TheArray {
 public:
    int find( int n, int d, int first, int last ) {
-     if (n==2) return max(first,last);
-
-     int a = 0;
-     int b = n-1;
-
-     while (a+1<b) {
-       int p = (a+b)/2;
-       int m = first + p * d;
-       int l = m - (n-2-p) * d;
-       if (l > last+d) b=p; else a=p;
-     }
-
-     int ans = first + a*d;
-     int las = ans - (n-2-a) * d;
-     ans += max(0, last-las);
+     int ans = max(first,last);
+     for (int i=0; i<n; ++i) ans = max(ans,min(first+i*d,last+(n-1-i)*d));
      return ans;
    }
 };
