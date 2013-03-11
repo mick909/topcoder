@@ -14,6 +14,16 @@
 
  n==2の場合はmax(first,last)なので先に弾いた方が楽
  すると、かならず補正( max(0, last-l)の加算 )ができる
+
+ 二分探索してみる
+ 探索範囲を[a=0, b=n-2]として、p=b+1のときにlast-l>dとなる位置を求める
+
+ max値探索で、範囲がb+1が範囲外となる閉区間[a,b]と置く場合、
+ 中点pが範囲外 -> b=p-1,
+ 中点pが範囲内 -> a=p
+ と動くので、中点をとるときに(a+b)/2 +1
+ と+1を入れなければならない
+ でないと区間が[a,a+1]となると終わらなくなる
 */
 
 #include <cstdio>
@@ -31,18 +41,20 @@ public:
    int find( int n, int d, int first, int last ) {
      if (n==2) return max(first,last);
 
-     int p = 0;
-     int m = first + p * d;
-     int l = m - (n-2-p) * d;
+     int a = 0;
+     int b = n-2;
 
-     while (abs(l-last) > d) {
-       ++p;
-       m += d;
-       l += d*2;
+     while (a<b) {
+       int p = (a+b)/2+1;
+       int m = first + p * d;
+       int l = m - (n-2-p) * d;
+       if (l > last+d) b=p-1; else a=p;
      }
 
-     m += max(0, last-l);
-     return m;
+     int ans = first + b*d;
+     int las = ans - (n-2-b) * d;
+     ans += max(0, last-las);
+     return ans;
    }
 };
 
