@@ -1,61 +1,46 @@
-// Paste me into the FileEdit configuration dialog
+/*
+ Johnがp点のとき、最大で何人がより高い得点を得るか？という問題に変形する
+ 人数が最大なので、p+1点を何人分取れるかを計算すれば良い
+ sum(sums[i]/(p+1))が、p+1点を取れる人数
+ Johnは0点から1,000,000,000点まで取れる
+ 
+ Johnがp点の時p+1点を取れる人数は、pの増加にともない減少"または同じ"
+ なので、k人を越えるちょうどそのpを探索する
+ 
+ 1,000,000,000 * 47なので単純なループではTLEの恐れ
+ pに比例して人数が減少なので、二分探索できる
+ 
+ (a,b]の区間探索。aは、a+1点を取れる人数がkを越えるところ。
 
+ sum(sums[i]/(p+1))はintをあふれるので注意！
+  => 最大値は、1,000,000,000 * 47 = 47*10^9 > 2.15*10^9 > 2^31
+ */
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <climits>
-#include <cfloat>
-#include <ctime>
-#include <map>
-#include <utility>
-#include <set>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <functional>
-#include <sstream>
-#include <complex>
-#include <stack>
-#include <queue>
+
 using namespace std;
-#define rep(i,b,e) for(int i=b;i<e;++i)
-#define mp make_pair
-#define pb push_back
-#define all(c) (c).begin(),(c).end()
-static const double EPS = 1e-9;
+
 typedef long long ll;
-typedef vector<int> vi;
-typedef vector<vi> vvi;
-typedef pair<int,int> pii;
-static const ll Zp = 1000000009;
 
 class TheOlympiadInInformatics {
 public:
    int find( vector <int> sums, int k ) {
-//   	sort(all(sums));
-   	int N = sums.size();
-/*
-   	ll sum=0;
-   	for (int i=0; i<N; ++i) {
-   		sum += sums[i];
-   	}
-   	if (k >= sum) return 0;
-*/   	
-   	ll a=0;
-   	ll b=1000000000; // sums[sums.size()-1];
-   	
-   	while (b>a) {
-   		ll m = (a+b)/2;
-   		
-   		ll kk=0;
-   		for (int i=0; i<N; ++i) {
-   			kk += sums[i]/(m+1);
-   		}
-   		if (kk > k) { a=m+1; } else {b=m;};
-   	}
-	return a;
+    int N=sums.size();
+    ll a = -1;
+    ll b = 1000000000;
+
+    while (a+1<b) {
+      ll m = (a+b)/2;
+      ll tot=0;
+      for (int i=0; i<N; ++i) tot += sums[i]/(m+1);
+      if (tot > k) a=m; else b=m;
+    }
+    
+    return b;
    }
 };
 
@@ -130,9 +115,9 @@ namespace moj_harness {
 	int run_test_case(int casenum__) {
 		switch (casenum__) {
 		case 0: {
-			int sums[]                = {4, 8, 0, 5};
+			int sums[]                = {4, 7, 0, 5};
 			int k                     = 0;
-			int expected__            = 8;
+			int expected__            = 7;
 
 			clock_t start__           = clock();
 			int received__            = TheOlympiadInInformatics().find(vector <int>(sums, sums + (sizeof sums / sizeof sums[0])), k);
