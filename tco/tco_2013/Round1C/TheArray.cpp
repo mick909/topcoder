@@ -11,6 +11,9 @@
 
  最後の条件(n=2かつ first>lastは補正できない)が面倒
  (見落とすとWA)
+
+ n==2の場合はmax(first,last)なので先に弾いた方が楽
+ すると、かならず補正( max(0, last-l)の加算 )ができる
 */
 
 #include <cstdio>
@@ -26,6 +29,8 @@ using namespace std;
 class TheArray {
 public:
    int find( int n, int d, int first, int last ) {
+     if (n==2) return max(first,last);
+
      int p = 0;
      int m = first + p * d;
      int l = m - (n-2-p) * d;
@@ -36,7 +41,7 @@ public:
        l += d*2;
      }
 
-     if (n > 2 || first<last) m += max(0, last-l);
+     m += max(0, last-l);
      return m;
    }
 };
