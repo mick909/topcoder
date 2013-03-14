@@ -44,6 +44,27 @@ public:
 	 // (pr/div)のjumpで、全pit j<=[0,N-1]をjumpできるか調べる
 	 // (pr/div)をjumpしながらではなく、以下の計算をしている
 	 //
+	 // 0                                pr
+	 // 0   p1     p2     p3     p4    p(div)
+	 //               lk-----rk
+	 // lkの左側で一番大きいp(k)を探す (p(k) <= lk, p(k+1)> lk)
+	 // p(k+1)がrkより小さい場合はpitに落ちる => if p(k+1) < rk then fall down
+	 // 
+	 // p(k) = floor(lk/p1)*p1, p1=pr/div
+	 // p(k+1) = floor(lk/p1)*p1 + p1
+	 // if ((floor(lk/(pr/div)) + 1) * (pr/div) < rk ... ?
+	 //
+	 // このまま計算すると、誤差の罠にはまる
+	 // 整数だけで計算できるよう、不等式を変形する
+	 // (floor(lk/(pr/div)) + 1) * pr < rk * div  (div>1)
+	 // (floor(lk*div/pr) * pr + pr < rk * div
+	 //
+	 // floor(lk*div/pr) * pr = lk*div - ((lk*div) mod pr)
+	 //   lk*div = a*pr + b (0<=b<=pr-1)とすると、
+	 //   floor(lk*div/pr) = a
+	 //   floor(lk*div/pr)*pr = a*pr = lk*div - b = lk*div - ((lk*div) mod pr)
+	 //
+	 // よって、lk*div - ((lk*div)mod pr) + pr < rk * div が条件式（整数のみ）
 	 for (int j=0; ok && j<N; ++j) {
 	   int lp = pits[j].first * div;
 	   if ((lp-(lp % pr) + pr) < pits[j].second * div) {
