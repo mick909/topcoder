@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <bitset>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -73,6 +74,40 @@ int prime_factorize2(int n, const int *p, int pcnt, vector<pair<int,int> >& f) {
   return idx;
 }
 
+
+/**
+ * 素因数分解
+ * nを素因数分解する
+ * retval f  : 素因数分解したときの、素因数と係数のペア
+ */
+void prime_factorize3(int n, vector<pair<int,int> >& f) {
+  f.clear();
+  if (n<=3) {
+    f.push_back(make_pair(n,1));
+    return;
+  }
+
+  int nn=n;
+  int c=0;
+  if ((n%2)==0) {
+    while ((n%2)==0) { n/=2; ++c; }
+    f.push_back(make_pair(2,c));
+  }
+  
+  for (int i=3; i*i<=nn && n>1; i+=2) {
+    if ((n%i)==0) {
+      c=0;
+      while ((n%i)==0) { n/=i; ++c; }
+      f.push_back(make_pair(i,c));
+    }
+  }
+
+  if (n!=1) {
+    f.push_back(make_pair(n,1));
+  }
+  return;
+}
+
 int main(int argc, char *argv[]) {
   int ps[MAX];
   int f[MAX];
@@ -120,6 +155,12 @@ int main(int argc, char *argv[]) {
   vector<pair<int,int> > r;
   int c2 = prime_factorize2(a, ps, cnt, r);
   for (int i=0; i<c2; ++i) {
+    cout << r[i].first << "^" << r[i].second << " ";
+  }
+  cout << endl;
+  
+  prime_factorize3(a,r);
+  for (int i=0; i<r.size(); ++i) {
     cout << r[i].first << "^" << r[i].second << " ";
   }
   cout << endl;
